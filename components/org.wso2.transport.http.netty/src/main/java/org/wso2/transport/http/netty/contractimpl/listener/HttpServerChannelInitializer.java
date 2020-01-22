@@ -38,6 +38,7 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AsciiString;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.slf4j.Logger;
@@ -78,6 +79,9 @@ import static org.wso2.transport.http.netty.contractimpl.common.Util.setSslHands
 public class HttpServerChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpServerChannelInitializer.class);
+    static final EventExecutorGroup group1 = new DefaultEventExecutorGroup(20);
+    static final EventExecutorGroup group2 = new DefaultEventExecutorGroup(20);
+    
 
     private long socketIdleTimeout;
     private boolean httpTraceLogEnabled;
@@ -198,11 +202,11 @@ public class HttpServerChannelInitializer extends ChannelInitializer<SocketChann
     public void configureHttpPipeline(ChannelPipeline serverPipeline, String initialHttpScheme) {
 
         if (initialHttpScheme.equals(Constants.HTTP_SCHEME)) {
-            serverPipeline.addLast(Constants.HTTP_ENCODER, new HttpResponseEncoder());
-            serverPipeline.addLast(Constants.HTTP_DECODER,
+            serverPipeline.addLast(group1, Constants.HTTP_ENCODER, new HttpResponseEncoder());
+            serverPipeline.addLast(group2, Constants.HTTP_DECODER,
                                    new HttpRequestDecoder(reqSizeValidationConfig.getMaxUriLength(),
                                                           reqSizeValidationConfig.getMaxHeaderSize(),
-                                                          reqSizeValidationConfig.getMaxChunkSize()));
+                                                          reqSizeValidationConfig.getMaxChunkSize()));           
 
             serverPipeline.addLast(Constants.HTTP_COMPRESSOR, new CustomHttpContentCompressor());
             serverPipeline.addLast(Constants.HTTP_CHUNK_WRITER, new ChunkedWriteHandler());
