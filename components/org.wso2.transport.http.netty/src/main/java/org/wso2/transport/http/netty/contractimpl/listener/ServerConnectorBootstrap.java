@@ -24,6 +24,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.oio.OioServerSocketChannel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.util.concurrent.EventExecutorGroup;
 import org.slf4j.Logger;
@@ -113,7 +114,7 @@ public class ServerConnectorBootstrap {
     }
 
     public void addThreadPools(EventLoopGroup bossGroup, EventLoopGroup workerGroup) {
-        serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
+        serverBootstrap.group(bossGroup, workerGroup).channel(OioServerSocketChannel.class);
     }
 
     public void addHttpTraceLogHandler(Boolean isHttpTraceLogEnabled) {
@@ -211,7 +212,7 @@ public class ServerConnectorBootstrap {
             serverConnectorFuture = new HttpWsServerConnectorFuture(channelFuture, allChannels);
             channelFuture.addListener(future -> {
                 if (future.isSuccess()) {
-                    log.info("HTTP(S) Interface starting on host {} and port {}", getHost(), getPort());
+                    log.info("HTTP(S) OIO Interface starting on host {} and port {}", getHost(), getPort());
                     serverConnectorFuture.notifyPortBindingEvent(this.connectorID, isHttps);
                 } else {
                     serverConnectorFuture.notifyPortBindingError(future.cause());
