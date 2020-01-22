@@ -23,6 +23,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -62,14 +63,14 @@ public class DefaultHttpWsConnectorFactory implements HttpWsConnectorFactory {
     private final ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     public DefaultHttpWsConnectorFactory() {
-        bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
-        workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
+        bossGroup = new OioEventLoopGroup(4);
+        workerGroup = new OioEventLoopGroup(200000);
         clientGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
     }
 
     public DefaultHttpWsConnectorFactory(int serverSocketThreads, int childSocketThreads, int clientThreads) {
-        bossGroup = new NioEventLoopGroup(serverSocketThreads);
-        workerGroup = new NioEventLoopGroup(childSocketThreads);
+        bossGroup = new OioEventLoopGroup(serverSocketThreads);
+        workerGroup = new OioEventLoopGroup(childSocketThreads);
         clientGroup = new NioEventLoopGroup(clientThreads);
     }
 
